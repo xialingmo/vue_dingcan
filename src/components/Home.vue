@@ -16,13 +16,15 @@
         <el-menu
           background-color="#545c64"
           text-color="#fff"
-          active-text-color="#409eff">
+          active-text-color="#409eff"
+          :router="true"
+          :default-active="activePath">
           <el-submenu index="1">
             <template slot="title">
               <i class="el-icon-user-solid"></i>
               <span>用户管理</span> 
             </template>
-            <el-menu-item index="1-1">
+            <el-menu-item index="users" @click="saveNavState(activePath)">
               <template slot="title">
                 <i class="el-icon-s-grid"></i>
                 <span>用户列表</span>
@@ -34,7 +36,7 @@
               <i class="el-icon-dessert"></i>
               <span>饮品管理</span> 
             </template>
-            <el-menu-item index="2-1" v-for="item in menulist" :key="item.tid">
+            <el-menu-item index="item.id" v-for="item in menulist" :key="item.tid">
               <template slot="title">
                 <i class="el-icon-cold-drink"></i>
                 <span>{{item.type_name}}</span>
@@ -46,7 +48,7 @@
               <i class="el-icon-chicken"></i>
               <span>订单管理</span> 
             </template>
-            <el-menu-item index="1-4-1">
+            <el-menu-item index="details">
               <template slot="title">
                 <i class="el-icon-menu"></i>
                 <span>订单详情</span>
@@ -67,24 +69,31 @@
 export default {
   data() {
     return {
-      menulist: []
+      menulist: [],
+      //被激活的动态链接
+      activePath: ''
     }
   },
   created() {
     this.getMenuList()
+    this.activePath = window.sessionStorage.getItem('activePath')
   },
   methods: {
     logout() {
       window.sessionStorage.clear()
       this.$router.push('/login')
+    },
+    async getMenuList() {
+      const { data:res } = await this.$http.get("") //请求饮品菜单路径
+      if(res.meta.status !== 200) return this.$message.error(res.meta.msg)
+      this.menulist = res.data
+      console.log(res)
+    },
+    //保存链接的激活状态
+    saveNavState(activePath) {
+      window.sessionStorage.setItem('activePath',activePath)
+      this.activePath = activePath
     }
-   
-  },
-  async getMenuList() {
-    const { data:res } = await this.$http.get("") //请求饮品菜单路径
-    if(res.meta.status !== 200) return this.$message.error(res.meta.msg)
-    this.menulist = res.data
-    console.log(res)
   }
 }
 </script>
